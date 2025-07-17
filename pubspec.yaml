@@ -1,0 +1,43 @@
+name: mental_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Dependencias de Firebase ---
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
+  cloud_firestore: ^4.15.8
+  cloud_functions: ^4.0.0 # Añadido para la integración con Cloud Functions
+  firebase_app_check: ^0.2.2+7
+
+  # --- Dependencia para guardar datos locales (aceptación de términos) ---
+  shared_preferences: ^2.2.2
+
+  # --- Otras dependencias de UI/Utilidad ---
+  cupertino_icons: ^1.0.2
+  fl_chart: ^1.0.0
+  http: ^1.4.0
+  intl: ^0.19.0 # Añadido para el formato de fechas en las pantallas de historial/comunidad
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  # --- Declaración de la carpeta de assets ---
+  assets:
+    - assets/
+    # Asegúrate de que los archivos como questions.json y quotes.json estén dentro de esta carpeta
+    # Ejemplo:
+    # - assets/questions.json
+    # - assets/quotes.json

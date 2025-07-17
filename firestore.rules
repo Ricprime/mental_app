@@ -1,0 +1,24 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // REGLAS PARA LOS DATOS PRIVADOS DEL USUARIO (su historial de ánimo)
+    match /users/{userId}/moods/{moodId} {
+      // Solo el dueño de los datos puede leerlos y escribirlos.
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // REGLAS PARA LA COLECCIÓN PÚBLICA DE POSTS DE LA COMUNIDAD
+    match /posts/{postId} {
+      // Cualquier usuario autenticado puede leer todos los posts.
+      allow read: if request.auth != null;
+      
+      // Un usuario autenticado puede crear un post, pero DEBE firmarlo con su propio ID.
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      
+      // Un usuario solo puede actualizar o borrar un post si es el autor original.
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+  }
+}

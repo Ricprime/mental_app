@@ -1,0 +1,22 @@
+[
+    {"id": 1, "question": "¿Qué tal te sientes hoy?"},
+    {"id": 2, "question": "¿Hay algo que te preocupe?"},
+    {"id": 3, "question": "¿Qué te hizo sonreír hoy?"},
+    {"id": 4, "question": "¿Qué aprendiste hoy?"},
+    {"id": 5, "question": "¿Cómo te gustaría mejorar mañana?"},
+    {"id": 6, "question": "¿Qué es lo que más valoras en tu vida?"},
+    {"id": 7, "question": "¿Qué te motiva a seguir adelante?"},
+    {"id": 8, "question": "¿Cómo te sientes respecto a tus relaciones personales?"},
+    {"id": 9, "question": "¿Qué te gustaría lograr esta semana?"},
+    {"id": 10, "question": "¿Cómo manejas el estrés en tu vida diaria?"},
+    {"id": 11, "question": "¿Qué te gustaría cambiar en tu rutina diaria?"},
+    {"id": 12, "question": "¿Qué te inspira a ser mejor cada día?"},
+    {"id": 13, "question": "¿Cómo te sientes respecto a tu salud física?"},
+    {"id": 14, "question": "¿Qué te gustaría aprender en el futuro?"},
+    {"id": 15, "question": "¿Cómo te sientes respecto a tu trabajo o estudios?"},
+    {"id": 16, "question": "¿Qué te hace sentir agradecido hoy?"},
+    {"id": 17, "question": "¿Cómo te gustaría pasar tu tiempo libre?"},
+    {"id": 18, "question": "¿Qué te gustaría hacer para relajarte?"},
+    {"id": 19, "question": "¿Cómo te sientes respecto a tus logros recientes?"},
+    {"id": 20, "question": "¿Qué es lo que más disfrutas hacer en tu día a día?"}
+]

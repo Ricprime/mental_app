@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "343310764140",
+    "project_id": "mentalapp-8917c",
+    "storage_bucket": "mentalapp-8917c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343310764140:android:9c1de7367d6c2f4aae3049",
+        "android_client_info": {
+          "package_name": "com.example.mental_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcOh1FW-6RuI1WcdREz-f54zK8wfgpKxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
