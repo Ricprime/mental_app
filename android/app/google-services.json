@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936864498709",
+    "project_id": "mentalp-bfc90",
+    "storage_bucket": "mentalp-bfc90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936864498709:android:37bf1496e16b0212f0ba1c",
+        "android_client_info": {
+          "package_name": "com.mentalp.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBewdi76qnfZmZWHpk-CoHj-0ePWNqLFRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

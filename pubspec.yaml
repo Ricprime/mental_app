@@ -1,21 +1,28 @@
-name: mental_app
-description: "A new Flutter project."
+name: Mentalp
+description: A daily mood and well-being tracking app
+
+# Evita que el paquete se publique accidentalmente en pub.dev.
 publish_to: 'none'
+
+# La versión de la aplicación.
 version: 1.0.0+1
 
+# La versión de Dart y Flutter requerida.
 environment:
   sdk: '>=3.2.3 <4.0.0'
 
+# --- Dependencias de Producción ---
 dependencies:
   flutter:
     sdk: flutter
 
   # --- Dependencias de Firebase ---
-  firebase_core: ^2.27.0
-  firebase_auth: ^4.17.8
-  cloud_firestore: ^4.15.8
-  cloud_functions: ^4.0.0 # Añadido para la integración con Cloud Functions
-  firebase_app_check: ^0.2.2+7
+  firebase_core: ^3.15.1
+  firebase_auth: ^5.6.2
+  cloud_firestore: ^5.6.11
+  cloud_functions: ^5.6.1
+  firebase_app_check: ^0.3.2+9
+  firebase_storage: ^12.4.9 # Actualizado a la versión sugerida
 
   # --- Dependencia para guardar datos locales (aceptación de términos) ---
   shared_preferences: ^2.2.2
@@ -24,20 +31,30 @@ dependencies:
   cupertino_icons: ^1.0.2
   fl_chart: ^1.0.0
   http: ^1.4.0
-  intl: ^0.19.0 # Añadido para el formato de fechas en las pantallas de historial/comunidad
+  intl: ^0.20.2
+  image_picker: ^1.1.2 # ¡AÑADIR ESTA LÍNEA!
 
+# --- DEPENDENCIAS DE DESARROLLO ---
+# Paquetes que solo se usan durante el desarrollo, no se incluyen en la app final.
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
+  # Paquete para cambiar el nombre del paquete de la app fácilmente.
+  change_app_package_name: ^1.1.0
+
+  # Herramientas de análisis de código para mantener un código limpio.
+  flutter_lints: ^6.0.0
+
+# --- CONFIGURACIÓN DE FLUTTER ---
+# La siguiente sección es específica para Flutter.
 flutter:
   uses-material-design: true
 
   # --- Declaración de la carpeta de assets ---
+  # Para añadir assets a tu aplicación, crea una carpeta 'assets' y descomenta esta sección.
   assets:
     - assets/
-    # Asegúrate de que los archivos como questions.json y quotes.json estén dentro de esta carpeta
     # Ejemplo:
     # - assets/questions.json
     # - assets/quotes.json

@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": "web_coming_soon",
+    "site": "mentalp-app",      // ¡AÑADIR ESTA LÍNEA!
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

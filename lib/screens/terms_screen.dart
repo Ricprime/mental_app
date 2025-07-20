@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mental_app/auth_gate.dart';
+// ¡IMPORTANTE! Ruta corregida para apuntar a la carpeta 'auth'.
+import '/auth/auth_gate.dart';
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});

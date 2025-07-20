@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mental_app/screens/login_screen.dart';
-import 'package:mental_app/screens/registration_screen.dart';
+// ¡IMPORTANTE! Rutas corregidas para apuntar a los archivos dentro de 'screens'.
+import 'login_screen.dart';
+import 'registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -17,7 +18,7 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               const Icon(Icons.spa, size: 100, color: Colors.blueAccent),
               const SizedBox(height: 20),
-              const Text('Bienvenido a MentalApp', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text('Bienvenido a Mentalp', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               Text('Tu espacio seguro para el bienestar', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
               const SizedBox(height: 60),

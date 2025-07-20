@@ -1,4 +1,4 @@
-package com.example.mental_app
+package com.mentalp.app
 
 import io.flutter.embedding.android.FlutterActivity
 

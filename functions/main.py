@@ -1,44 +1,57 @@
-import os
-import functions_framework
-import google.generativeai as genai
-from firebase_functions import https_fn
+# Importa los módulos necesarios de Firebase
 from firebase_admin import initialize_app
+from firebase_functions import https_fn, options
+import google.generativeai as genai
 
-# Inicializa la aplicación de Firebase Admin SDK (necesario para funciones)
+# (Opcional pero recomendado) Fija la región para tus funciones
+options.set_global_options(region="europe-west1")
+
+# Inicializa Firebase
 initialize_app()
 
-@https_fn.on_request()
-def callGeminiApi(req: https_fn.Request) -> https_fn.Response:
+# Define el secreto donde guardaste tu API key
+GEMINI_API_KEY = options.SecretParam("GEMINI_API_KEY")
+
+@https_fn.on_call(secrets=[GEMINI_API_KEY])
+def callGeminiApi(req: https_fn.CallableRequest):
     """
-    Función HTTP de Firebase que llama a la API de Gemini.
-    Recibe un prompt y devuelve la respuesta de Gemini.
+    Función Invocable (Callable Function) que llama a la API de Gemini de forma segura.
     """
+    # 1. VERIFICACIÓN DE SEGURIDAD AUTOMÁTICA
+    # Si el usuario no está autenticado, esta línea dará un error y la función se detendrá.
+    if req.auth is None:
+        raise https_fn.HttpsError(
+            code="unauthenticated",
+            message="La función solo puede ser llamada por usuarios autenticados."
+        )
+
+    # 2. OBTENER LOS DATOS DE FORMA SENCILLA
+    # El prompt viene directamente en req.data
+    user_prompt = req.data.get("prompt")
+    if not user_prompt:
+        raise https_fn.HttpsError(
+            code="invalid-argument",
+            message="La función debe ser llamada con un argumento 'prompt'."
+        )
+
     try:
-        # Obtener la clave de API de Gemini de las variables de entorno
-        # ¡IMPORTANTE! Esto se configurará en Firebase después de escribir el código.
-        gemini_api_key = os.environ.get("GEMINI_API_KEY")
-        if not gemini_api_key:
-            return https_fn.Response("Error: GEMINI_API_KEY no configurada.", status=500)
-
-        genai.configure(api_key=gemini_api_key)
-
-        # Obtener el prompt del cuerpo de la solicitud (enviado desde Flutter)
-        request_json = req.get_json(silent=True)
-        if request_json and 'prompt' in request_json:
-            user_prompt = request_json['prompt']
-        else:
-            return https_fn.Response("Error: 'prompt' no encontrado en la solicitud.", status=400)
-
-        # Inicializar el modelo Gemini
+        # 3. CONFIGURAR GEMINI CON EL SECRETO
+        genai.configure(api_key=GEMINI_API_KEY.value())
         model = genai.GenerativeModel('gemini-pro')
 
-        # Generar contenido con Gemini
-        response = model.generate_content(user_prompt)
+        # Combina el prompt del sistema con el del usuario
+        system_prompt = "Eres un asistente de bienestar personal, amigable y empático llamado MentalApp Assistant. Tu objetivo es escuchar, ofrecer apoyo y guiar al usuario en su reflexión. No des consejos médicos. Mantén las respuestas concisas y conversacionales."
+        full_prompt = f"{system_prompt}\n\nMensaje del usuario: {user_prompt}"
 
-        # Devolver la respuesta de Gemini
-        return https_fn.Response(response.text, status=200, headers={"Content-Type": "text/plain"})
+        # Generar contenido
+        response = model.generate_content(full_prompt)
+
+        # 4. DEVOLVER LA RESPUESTA
+        return {"text": response.text}
 
     except Exception as e:
-        # Manejo de errores
         print(f"Error al llamar a Gemini API: {e}")
-        return https_fn.Response(f"Error interno del servidor: {e}", status=500)
+        raise https_fn.HttpsError(
+            code="internal",
+            message="No se pudo obtener una respuesta del asistente."
+        )
