@@ -18,20 +18,30 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               const Icon(Icons.spa, size: 100, color: Colors.blueAccent),
               const SizedBox(height: 20),
-              const Text('Bienvenido a Mentalp', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text('Bienvenido a Mentalp',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-              Text('Tu espacio seguro para el bienestar', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+              Text('Tu espacio seguro para el bienestar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600])),
               const SizedBox(height: 60),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const RegistrationScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegistrationScreen()));
                 },
                 child: const Text('CREAR CUENTA'),
               ),
               const SizedBox(height: 15),
               OutlinedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()));
                 },
                 child: const Text('INICIAR SESIÓN'),
               ),

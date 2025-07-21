@@ -22,7 +22,7 @@ dependencies:
   cloud_firestore: ^5.6.11
   cloud_functions: ^5.6.1
   firebase_app_check: ^0.3.2+9
-  firebase_storage: ^12.4.9 # Actualizado a la versión sugerida
+  firebase_storage: ^12.4.9
 
   # --- Dependencia para guardar datos locales (aceptación de términos) ---
   shared_preferences: ^2.2.2
@@ -32,10 +32,10 @@ dependencies:
   fl_chart: ^1.0.0
   http: ^1.4.0
   intl: ^0.20.2
-  image_picker: ^1.1.2 # ¡AÑADIR ESTA LÍNEA!
+  image_picker: ^1.1.2 # <<<< AÑADIDO: Para seleccionar imágenes.
+  google_fonts: ^6.2.1  # <<<< AÑADIDO: Para usar fuentes personalizadas y elegantes.
 
 # --- DEPENDENCIAS DE DESARROLLO ---
-# Paquetes que solo se usan durante el desarrollo, no se incluyen en la app final.
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,15 +46,25 @@ dev_dependencies:
   # Herramientas de análisis de código para mantener un código limpio.
   flutter_lints: ^6.0.0
 
+  # <<<< AÑADIDO: Para generar el ícono de la app automáticamente.
+  flutter_launcher_icons: ^0.13.1
+
 # --- CONFIGURACIÓN DE FLUTTER ---
-# La siguiente sección es específica para Flutter.
 flutter:
   uses-material-design: true
 
   # --- Declaración de la carpeta de assets ---
-  # Para añadir assets a tu aplicación, crea una carpeta 'assets' y descomenta esta sección.
+  # <<<< CORREGIDO: Declaramos las subcarpetas para que Flutter las encuentre.
   assets:
     - assets/
-    # Ejemplo:
-    # - assets/questions.json
-    # - assets/quotes.json
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/ # Dejamos esta lista para el futuro.
+
+# --- CONFIGURACIÓN PARA EL ÍCONO DE LA APP ---
+# <<<< AÑADIDO: Configuración para el paquete flutter_launcher_icons.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.jpg" # O .png si usas esa extensión
+  min_sdk_android: 21

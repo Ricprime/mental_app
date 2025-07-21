@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
+// --- WIDGET PRINCIPAL DE LA PANTALLA DE CHAT ---
 class PrivateChatScreen extends StatefulWidget {
   const PrivateChatScreen({super.key});
 
@@ -17,19 +18,21 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
   @override
   void initState() {
     super.initState();
+    // Mensaje de bienvenida inicial del asistente.
     _messages.add({
       'role': 'model',
       'text': '¡Hola! Soy tu asistente de bienestar. ¿En qué puedo ayudarte hoy?',
     });
   }
 
+  // --- LÓGICA PARA ENVIAR UN MENSAJE ---
   Future<void> _sendMessage() async {
-    if (_textController.text.trim().isEmpty) return;
+    if (_textController.text.trim().isEmpty || _isLoading) return;
 
     final userMessage = _textController.text.trim();
     setState(() {
       _messages.add({'role': 'user', 'text': userMessage});
-      _isLoading = true;
+      _isLoading = true; // Bloquea el campo de entrada mientras se espera la respuesta.
     });
     _textController.clear();
     _scrollToBottom();
@@ -56,36 +59,25 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
     }
   }
 
-  // ¡¡¡FUNCIÓN CORREGIDA!!!
-  // Llama a la Cloud Function 'callGeminiApi' y procesa la respuesta JSON
+  // Lógica para llamar a la Cloud Function (tu código original, que es correcto).
   Future<String> _getGeminiResponse(String userMessage) async {
-    // Solo enviamos el mensaje del usuario, ya que el prompt del sistema
-    // está configurado directamente en el código de la Cloud Function en Python.
-    final prompt = userMessage;
-
+    final HttpsCallable callable =
+        FirebaseFunctions.instance.httpsCallable('callGeminiApi');
     try {
-      // Llama a la función invocable
-      final HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable('callGeminiApi');
-
-      // Envía el prompt y espera un Mapa (JSON) como respuesta
       final result = await callable.call<Map<String, dynamic>>(
-        <String, dynamic>{'prompt': prompt},
+        <String, dynamic>{'prompt': userMessage},
       );
-
-      // EXTRAE EL TEXTO DE LA RESPUESTA JSON
-      // result.data es ahora un Mapa, y accedemos a la clave 'text'.
       return result.data['text'] ?? 'No se recibió una respuesta válida.';
     } on FirebaseFunctionsException catch (e) {
-      debugPrint(
-          'Error al llamar a la función Cloud: ${e.code} - ${e.message}');
-      return 'Lo siento, el asistente no está disponible en este momento. (Error: ${e.code})';
+      debugPrint('Error Cloud Function: ${e.code} - ${e.message}');
+      return 'Lo siento, el asistente no está disponible. (Error: ${e.code})';
     } catch (e) {
-      debugPrint('Error inesperado al llamar a la función: $e');
+      debugPrint('Error inesperado: $e');
       return 'Lo siento, ha ocurrido un error inesperado.';
     }
   }
 
+  // Desplaza el scroll hasta el final de la lista.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -100,57 +92,117 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Usamos los colores y fuentes de nuestro tema centralizado.
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Asistente Personal')),
+      appBar: AppBar(
+        title: const Text('Asistente Personal'),
+        // Sombra sutil para dar profundidad cuando se hace scroll.
+        scrolledUnderElevation: 1.0,
+      ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _messages.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              itemCount: _messages.length + (_isLoading ? 1 : 0), // Añade espacio para el indicador de "escribiendo..."
               itemBuilder: (context, index) {
+                // MEJORA UX: Muestra una burbuja de "escribiendo..." mientras se carga.
+                if (index == _messages.length) {
+                  return const _TypingIndicatorBubble();
+                }
+
                 final message = _messages[index];
                 final isUserMessage = message['role'] == 'user';
-                return _ChatBubble(
-                  text: message['text']!,
-                  isUserMessage: isUserMessage,
-                );
+                
+                // MEJORA UI: El avatar solo se muestra junto a los mensajes del asistente.
+                if (isUserMessage) {
+                  return _ChatMessageBubble(
+                    text: message['text']!,
+                    isUserMessage: true,
+                  );
+                } else {
+                  // Mensaje del Asistente con Avatar.
+                  return _AssistantMessage(text: message['text']!);
+                }
               },
             ),
           ),
-          if (_isLoading)
-            const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator()),
-          _buildInputField(),
+          _buildInputField(theme),
         ],
       ),
     );
   }
 
-  Widget _buildInputField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                hintText: 'Escribe un mensaje...',
-                border: OutlineInputBorder(),
+  // --- WIDGET PARA EL CAMPO DE ENTRADA ---
+  // Se ha mejorado el diseño para que coincida con el tema de la app.
+  Widget _buildInputField(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1.0)),
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _textController,
+                enabled: !_isLoading, // Deshabilita el campo mientras carga.
+                onSubmitted: (_) => _sendMessage(),
+                decoration: InputDecoration(
+                  hintText: _isLoading ? 'Esperando respuesta...' : 'Escribe un mensaje...',
+                  filled: true,
+                  fillColor: theme.scaffoldBackgroundColor,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
-              onSubmitted: (_) => _sendMessage(),
             ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.send_rounded),
+              onPressed: _isLoading ? null : _sendMessage, // Deshabilita el botón mientras carga.
+              style: IconButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- WIDGET PARA EL MENSAJE COMPLETO DEL ASISTENTE (AVATAR + BURBUJA) ---
+class _AssistantMessage extends StatelessWidget {
+  final String text;
+  const _AssistantMessage({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CircleAvatar(
+            radius: 20,
+            backgroundImage: AssetImage('assets/images/ai_avatar.jpg'), // <<< AQUÍ ESTÁ EL AVATAR
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _sendMessage,
-            style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
+          const SizedBox(width: 12),
+          Expanded(
+            child: _ChatMessageBubble(
+              text: text,
+              isUserMessage: false,
             ),
           ),
         ],
@@ -159,31 +211,51 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
   }
 }
 
-class _ChatBubble extends StatelessWidget {
+// --- WIDGET PARA LA BURBUJA DE CHAT (REFACTORIZADO) ---
+// Ahora es más limpio y se adapta al diseño.
+class _ChatMessageBubble extends StatelessWidget {
   final String text;
   final bool isUserMessage;
 
-  const _ChatBubble({required this.text, required this.isUserMessage});
+  const _ChatMessageBubble({required this.text, required this.isUserMessage});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Align(
       alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-        padding: const EdgeInsets.all(12),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
-          color: isUserMessage
-              ? Theme.of(context).primaryColor
-              : Colors.grey[300],
-          borderRadius: BorderRadius.circular(15),
+          color: isUserMessage ? theme.primaryColor : theme.cardColor,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: isUserMessage ? const Radius.circular(20) : const Radius.circular(0),
+            bottomRight: isUserMessage ? const Radius.circular(0) : const Radius.circular(20),
+          ),
         ),
         child: Text(
           text,
-          style:
-              TextStyle(color: isUserMessage ? Colors.white : Colors.black87),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: isUserMessage ? Colors.white : theme.textTheme.bodyLarge?.color,
+          ),
         ),
       ),
+    );
+  }
+}
+
+// --- WIDGET INDICADOR DE "ESCRIBIENDO..." ---
+class _TypingIndicatorBubble extends StatelessWidget {
+  const _TypingIndicatorBubble();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+      alignment: Alignment.centerLeft,
+      child: _AssistantMessage(text: "...") // Reutilizamos el widget del asistente
     );
   }
 }

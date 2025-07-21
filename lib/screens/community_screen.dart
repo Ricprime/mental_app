@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart'; // Para formatear la fecha
-import '/widgets/image_upload_widget.dart'; // Tu widget de subida de imágenes
+import 'package:intl/intl.dart';
+import 'package:mentalp/widgets/image_upload_widget.dart'; // Importamos tu widget
 
+// --- Pantalla Principal de la Comunidad ---
 class CommunityScreen extends StatefulWidget {
-  // Cambiado a StatefulWidget para manejar el estado de la imagen
   const CommunityScreen({super.key});
 
   @override
@@ -14,243 +14,331 @@ class CommunityScreen extends StatefulWidget {
 
 class _CommunityScreenState extends State<CommunityScreen> {
   final TextEditingController _postController = TextEditingController();
-  String?
-      _postImageUrl; // Para almacenar la URL de la imagen del post antes de publicarlo
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Instancia de FirebaseAuth
+  String? _postImageUrl;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Función para mostrar mensajes al usuario (SnackBar)
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  // Función que se llama desde ImageUploadWidget cuando la imagen se sube con éxito
-  void _handlePostImageUpload(String imageUrl, ImageUploadPurpose purpose) {
-    if (purpose == ImageUploadPurpose.communityPost) {
-      setState(() {
-        _postImageUrl = imageUrl; // Guarda la URL temporalmente para el post
-      });
-      _showMessage('Imagen lista para el post!');
-    }
-  }
-
-  // Función para crear un nuevo post en Firestore
-  Future<void> _createPost() async {
-    final user = _auth.currentUser;
-    if (user == null || _postController.text.trim().isEmpty) {
-      // trim() para evitar posts solo con espacios
-      _showMessage('Debes iniciar sesión y escribir un mensaje.');
-      return;
-    }
-
-    try {
-      await FirebaseFirestore.instance.collection('posts').add({
-        'text': _postController.text.trim(), // Guarda el texto del post
-        'authorId': user.uid,
-        'authorName': user.email?.split('@')[0] ??
-            'Anónimo', // Obtiene el nombre de usuario
-        'createdAt': Timestamp.now(), // Marca de tiempo del servidor
-        'imageUrl':
-            _postImageUrl, // Guarda la URL de la imagen (puede ser null)
-      });
-
-      _postController.clear(); // Limpia el campo de texto
-      setState(() {
-        _postImageUrl = null; // Limpia la URL de la imagen después de publicar
-      });
-      Navigator.of(context).pop(); // Cierra el diálogo
-      _showMessage('Post creado con éxito!');
-    } catch (e) {
-      _showMessage('Error al crear el post: $e');
-      print(
-          'Error al crear el post: $e'); // Imprime el error en la consola para depuración
-    }
-  }
-
-  // Muestra un diálogo para crear un nuevo post
-  void _showCreatePostDialog(BuildContext context) {
-    // Reinicia la URL de la imagen del post cuando se abre el diálogo
-    setState(() {
-      _postImageUrl = null;
-    });
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Compartir en la Comunidad'),
-          content: SingleChildScrollView(
-            // Permite desplazamiento si el contenido es largo
-            child: Column(
-              mainAxisSize:
-                  MainAxisSize.min, // Ajusta el tamaño del diálogo al contenido
-              children: [
-                TextField(
-                  controller: _postController,
-                  decoration: const InputDecoration(
-                      hintText: 'Escribe tus pensamientos...'),
-                  autofocus: true,
-                  maxLines: 5,
-                ),
-                const SizedBox(height: 20),
-                // Widget de subida de imagen para el post
-                ImageUploadWidget(
-                  purpose:
-                      ImageUploadPurpose.communityPost, // Indica el propósito
-                  onImageUploaded:
-                      _handlePostImageUpload, // Callback al subir la imagen
-                ),
-                // Muestra una vista previa de la imagen seleccionada para el post
-                if (_postImageUrl != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Image.network(_postImageUrl!,
-                        height: 100, fit: BoxFit.cover),
-                  ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  _postImageUrl = null; // Limpia la URL si se cancela el post
-                });
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: _createPost,
-              child: const Text('Publicar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // --- Lógica de Creación de Post (Tu código original, movido al final por legibilidad) ---
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: const Text('Comunidad Mentalp')), // Título de la AppBar
-      // Usamos un StreamBuilder para que la lista de posts se actualice en tiempo real
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('posts')
-            .orderBy('createdAt', descending: true) // Lo más nuevo, primero
-            .limit(50) // Limitamos a 50 posts para no sobrecargar
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator()); // Indicador de carga
-          }
-          if (snapshot.hasError) {
-            return Center(
-                child: Text('Error: ${snapshot.error}')); // Muestra errores
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-                child: Text(
-                    'Aún no hay publicaciones. ¡Sé el primero!')); // Mensaje si no hay posts
-          }
-
-          final posts = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts[index].data() as Map<String, dynamic>;
-              return _PostCard(post: post); // Muestra cada post en una tarjeta
-            },
-          );
-        },
+      // Ya no necesitamos una AppBar aquí, el header visual la reemplaza.
+      body: CustomScrollView(
+        slivers: [
+          _buildHeader(context), // Header visual que hemos diseñado.
+          _buildFeedContent(), // Contenido del feed (los posts).
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            _showCreatePostDialog(context), // Abre el diálogo para crear post
+        onPressed: () => _showCreatePostDialog(context),
         tooltip: 'Crear publicación',
         child: const Icon(Icons.add),
       ),
     );
   }
+
+  // --- WIDGETS DE LA INTERFAZ ---
+
+  // 1. Cabecera visual de la pantalla de comunidad.
+  SliverAppBar _buildHeader(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 220.0,
+      floating: false,
+      pinned: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Image.asset(
+          'assets/images/community_header.jpg', // <<< IMAGEN DE CABECERA
+          fit: BoxFit.cover,
+          color: Colors.black
+              .withOpacity(0.3), // Ligero oscurecimiento para legibilidad
+          colorBlendMode: BlendMode.darken,
+        ),
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+        title: Text(
+          'Un espacio para compartir',
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  // 2. Contenido del feed que se actualiza en tiempo real.
+  Widget _buildFeedContent() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()));
+        }
+        if (snapshot.hasError) {
+          return SliverFillRemaining(
+              child: Center(child: Text('Error: ${snapshot.error}')));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SliverFillRemaining(
+              child: _EmptyFeedView()); // Vista para cuando no hay posts
+        }
+
+        final posts = snapshot.data!.docs;
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final post = posts[index].data() as Map<String, dynamic>;
+              return _PostCard(post: post);
+            },
+            childCount: posts.length,
+          ),
+        );
+      },
+    );
+  }
+
+  // 3. Vista que se muestra cuando el feed está vacío.
+  Widget _EmptyFeedView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/mindfulness_inspiration.jpg', // <<< IMAGEN DE INSPIRACIÓN
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'La comunidad te espera',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Aún no hay publicaciones. ¡Sé el primero en compartir tus pensamientos y conectar con otros!',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- LÓGICA Y DIÁLOGO PARA CREAR POSTS ---
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // Usamos un StatefulBuilder para que solo el contenido del diálogo se actualice
+  void _showCreatePostDialog(BuildContext context) {
+    _postImageUrl = null; // Reinicia la imagen al abrir
+    _postController.clear(); // Limpia el texto anterior
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        // StatefulBuilder permite que el diálogo tenga su propio estado interno
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              title: const Text('Compartir en la Comunidad'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _postController,
+                      decoration: const InputDecoration(
+                          hintText: 'Escribe tus pensamientos...'),
+                      autofocus: true,
+                      maxLines: 5,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                    const SizedBox(height: 20),
+                    // Vista previa de la imagen y widget de subida
+                    if (_postImageUrl != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(_postImageUrl!,
+                            height: 150,
+                            width: double.infinity,
+                            fit: BoxFit.cover),
+                      ),
+                    const SizedBox(height: 10),
+                    ImageUploadWidget(
+                      purpose: ImageUploadPurpose.communityPost,
+                      onImageUploaded: (imageUrl, purpose) {
+                        if (purpose == ImageUploadPurpose.communityPost) {
+                          setDialogState(() {
+                            // Actualiza solo el estado del diálogo
+                            _postImageUrl = imageUrl;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: _createPost,
+                  child: const Text('Publicar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _createPost() async {
+    final user = _auth.currentUser;
+    if (user == null || _postController.text.trim().isEmpty) {
+      _showMessage('Debes iniciar sesión y escribir un mensaje.');
+      return;
+    }
+    Navigator.of(context)
+        .pop(); // Cierra el diálogo inmediatamente para dar feedback al usuario
+
+    try {
+      await FirebaseFirestore.instance.collection('posts').add({
+        'text': _postController.text.trim(),
+        'authorId': user.uid,
+        'authorName':
+            user.displayName ?? user.email?.split('@')[0] ?? 'Anónimo',
+        'authorPhotoUrl':
+            user.photoURL, // Guardamos la foto de perfil del usuario
+        'createdAt': Timestamp.now(),
+        'imageUrl': _postImageUrl,
+        'likes': [], // Preparamos el campo para futuros likes
+      });
+      _showMessage('Post creado con éxito!');
+    } catch (e) {
+      _showMessage('Error al crear el post: $e');
+    } finally {
+      _postImageUrl = null;
+      _postController.clear();
+    }
+  }
 }
 
-// Widget para mostrar cada tarjeta de publicación
+// --- WIDGET PARA CADA TARJETA DE POST (REDiseñado) ---
 class _PostCard extends StatelessWidget {
   final Map<String, dynamic> post;
   const _PostCard({required this.post});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final timestamp = post['createdAt'] as Timestamp?;
     final date = timestamp != null
-        ? DateFormat('dd/MM/yy, HH:mm').format(timestamp.toDate())
-        : 'Ahora';
+        ? DateFormat('dd MMM, HH:mm').format(timestamp.toDate())
+        : '';
+    final authorName = post['authorName'] ?? 'Anónimo';
+    final authorPhotoUrl = post['authorPhotoUrl'];
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Muestra el nombre del autor del post
-            Text(
-              post['authorName'] ?? 'Anónimo',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            // Cabecera del post con avatar, nombre y fecha
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: theme.primaryColor.withAlpha(50),
+                  backgroundImage: authorPhotoUrl != null
+                      ? NetworkImage(authorPhotoUrl)
+                      : null,
+                  child: authorPhotoUrl == null
+                      ? Text(authorName.substring(0, 1).toUpperCase(),
+                          style: TextStyle(
+                              color: theme.primaryColor,
+                              fontWeight: FontWeight.bold))
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(authorName,
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(date,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey[600])),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 5),
-            // Muestra el texto del post
-            Text(
-              post['text'] ?? 'Sin contenido',
-              style: const TextStyle(fontSize: 16),
-            ),
-            // Muestra la imagen del post si existe
+            const SizedBox(height: 16),
+            // Contenido del post (texto e imagen)
+            Text(post['text'] ?? '',
+                style: theme.textTheme.bodyLarge?.copyWith(height: 1.5)),
             if (post['imageUrl'] != null && post['imageUrl'].isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Image.network(
-                post['imageUrl'],
-                fit: BoxFit.cover,
-                width: double
-                    .infinity, // La imagen ocupa todo el ancho de la tarjeta
-                height: 200, // Altura fija para las imágenes de post
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    height: 200,
-                    child: const Center(
-                      child: Icon(Icons.broken_image, color: Colors.grey),
-                    ),
-                  );
-                },
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  post['imageUrl'],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 220,
+                  // Añadimos un indicador de carga más sutil
+                  loadingBuilder: (context, child, progress) => progress == null
+                      ? child
+                      : Container(height: 220, color: Colors.grey[200]),
+                  errorBuilder: (context, error, stack) => Container(
+                      height: 220,
+                      color: Colors.grey[200],
+                      child:
+                          const Icon(Icons.broken_image, color: Colors.grey)),
+                ),
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            // Barra de acciones (preparada para el futuro)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Muestra la fecha y hora del post
-                Text(
-                  'Publicado: $date',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
+                IconButton(
+                    icon: const Icon(Icons.favorite_border),
+                    onPressed: () {},
+                    color: Colors.grey[700]),
+                IconButton(
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    onPressed: () {},
+                    color: Colors.grey[700]),
               ],
-            )
+            ),
           ],
         ),
       ),
