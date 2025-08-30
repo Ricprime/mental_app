@@ -32,8 +32,8 @@ dependencies:
   fl_chart: ^1.0.0
   http: ^1.4.0
   intl: ^0.20.2
-  image_picker: ^1.1.2 # <<<< AÑADIDO: Para seleccionar imágenes.
-  google_fonts: ^6.2.1  # <<<< AÑADIDO: Para usar fuentes personalizadas y elegantes.
+  image_picker: ^1.1.2
+  google_fonts: ^6.2.1
 
 # --- DEPENDENCIAS DE DESARROLLO ---
 dev_dependencies:
@@ -46,25 +46,23 @@ dev_dependencies:
   # Herramientas de análisis de código para mantener un código limpio.
   flutter_lints: ^6.0.0
 
-  # <<<< AÑADIDO: Para generar el ícono de la app automáticamente.
+  # Para generar el ícono de la app automáticamente.
   flutter_launcher_icons: ^0.13.1
 
 # --- CONFIGURACIÓN DE FLUTTER ---
 flutter:
   uses-material-design: true
 
-  # --- Declaración de la carpeta de assets ---
-  # <<<< CORREGIDO: Declaramos las subcarpetas para que Flutter las encuentre.
+  # Declaración de la carpeta de assets
   assets:
     - assets/
     - assets/images/
     - assets/icons/
-    - assets/fonts/ # Dejamos esta lista para el futuro.
+    - assets/fonts/
 
 # --- CONFIGURACIÓN PARA EL ÍCONO DE LA APP ---
-# <<<< AÑADIDO: Configuración para el paquete flutter_launcher_icons.
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/app_icon.jpg" # O .png si usas esa extensión
+  image_path: "assets/icon/app_icon.jpg"
   min_sdk_android: 21

@@ -1,8 +1,9 @@
+// lib/screens/terms_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
-// ¡IMPORTANTE! Ruta corregida para apuntar a la carpeta 'auth'.
-import '/auth/auth_gate.dart';
+// --- CORRECCIÓN: Se usa la ruta relativa correcta ---
+import '../auth/auth_gate.dart';
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
@@ -12,8 +13,7 @@ class TermsScreen extends StatefulWidget {
 }
 
 class _TermsScreenState extends State<TermsScreen> {
-  String _termsText = 'Cargando términos...';
-  bool _isLoading = true;
+  String _termsContent = "Cargando términos...";
 
   @override
   void initState() {
@@ -21,30 +21,21 @@ class _TermsScreenState extends State<TermsScreen> {
     _loadTerms();
   }
 
-  // Carga el texto desde el archivo de assets
   Future<void> _loadTerms() async {
-    try {
-      final text = await rootBundle.loadString('assets/terminos.txt');
+    final content = await rootBundle.loadString('assets/terminos.txt');
+    if (mounted) {
       setState(() {
-        _termsText = text;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _termsText = 'Error al cargar los términos. Asegúrate de que el archivo "assets/terminos.txt" existe.';
-        _isLoading = false;
+        _termsContent = content;
       });
     }
   }
 
-  // Guarda la aceptación y reconstruye la app
   Future<void> _acceptTerms() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('terms_accepted', true);
-
-    // Vuelve a cargar el AuthGate para que re-evalúe el estado
     if (mounted) {
-      Navigator.of(context).pushReplacement(
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(builder: (context) => const AuthGate()),
       );
     }
@@ -55,33 +46,24 @@ class _TermsScreenState extends State<TermsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Términos y Condiciones'),
-        automaticallyImplyLeading: false, // Oculta el botón de volver
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SingleChildScrollView(
-                  child: Text(_termsText),
-                ),
-              ),
+        child: Scrollbar(
+          child: SingleChildScrollView(
+            child: Text(
+              _termsContent,
+              style:
+                  Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _acceptTerms,
-              child: const Text('ACEPTAR Y CONTINUAR'),
-            ),
-          ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+        child: ElevatedButton(
+          onPressed: _acceptTerms,
+          child: const Text('He leído y acepto los términos'),
         ),
       ),
     );

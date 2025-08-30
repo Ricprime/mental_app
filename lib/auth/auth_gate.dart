@@ -20,7 +20,8 @@ class AuthGate extends StatelessWidget {
       future: _areTermsAccepted(),
       builder: (context, termsSnapshot) {
         if (termsSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         if (termsSnapshot.data == false) {
           return const TermsScreen();

@@ -1,12 +1,13 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
-import 'package:mentalp/theme/app_theme.dart'; // Importamos nuestro tema centralizado.
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'firebase_options.dart';
-import 'package:mentalp/auth/auth_gate.dart';
 
-// --- Falta de punto y coma corregido en la importación de welcome_screen.dart ---
-import 'package:mentalp/screens/welcome_screen.dart';
+// --- CORRECCIÓN: Se usan rutas relativas para importar tus propios archivos ---
+import 'theme/app_theme.dart';
+import 'firebase_options.dart';
+import 'auth/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,6 @@ void main() async {
 }
 
 // --- Clase ÚNICA Y PRINCIPAL de la aplicación ---
-// Hemos eliminado la clase 'MyApp' duplicada para evitar confusiones.
 class MentalpApp extends StatelessWidget {
   const MentalpApp({super.key});
 
@@ -45,12 +45,10 @@ class MentalpApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Mentalp',
 
-      // --- TEMA VISUAL DE LA APP ---
-      // ¡Aquí está la magia! Simplemente aplicamos el tema que definimos en app_theme.dart
+      // Aplicamos el tema que definimos en app_theme.dart
       theme: AppTheme.lightTheme,
 
-      // El punto de entrada de la app es AuthGate, que decide qué pantalla mostrar.
-      // Esto está perfecto.
+      // El punto de entrada de la app es AuthGate
       home: const AuthGate(),
     );
   }

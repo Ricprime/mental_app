@@ -1,7 +1,9 @@
+// lib/screens/registration_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // <<< AÑADIDO: Para guardar datos del usuario
-import 'package:mentalp/widgets/image_upload_widget.dart'; // <<< AÑADIDO: Nuestro widget de subida
+import 'package:cloud_firestore/cloud_firestore.dart';
+// --- CORRECCIÓN: Se usa la ruta relativa correcta ---
+import '../widgets/image_upload_widget.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -10,13 +12,12 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final _nameController = TextEditingController(); // <<< AÑADIDO: Para el nombre de usuario
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _profileImageUrl; // <<< AÑADIDO: Para almacenar la URL de la foto de perfil
+  String? _profileImageUrl;
   bool _isLoading = false;
 
-  // <<< AÑADIDO: Callback que recibe la URL desde ImageUploadWidget
   void _handleImageUpload(String imageUrl, ImageUploadPurpose purpose) {
     if (purpose == ImageUploadPurpose.profile) {
       setState(() {
@@ -26,7 +27,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<void> _register() async {
-    // --- MEJORA: Validaciones más completas ---
     if (_profileImageUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, sube una foto de perfil.')));
       return;
@@ -39,7 +39,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     setState(() { _isLoading = true; });
 
     try {
-      // 1. Crear el usuario en Firebase Auth
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -48,11 +47,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final user = userCredential.user;
       if (user == null) return;
 
-      // 2. Actualizar el perfil de FirebaseAuth (nombre y foto)
       await user.updateDisplayName(_nameController.text.trim());
       await user.updatePhotoURL(_profileImageUrl);
 
-      // 3. Guardar la información adicional del usuario en Firestore
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'uid': user.uid,
         'displayName': _nameController.text.trim(),
@@ -61,7 +58,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         'createdAt': Timestamp.now(),
       });
 
-      // 4. Navegar a la pantalla principal
       if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
 
     } on FirebaseAuthException catch (e) {
@@ -73,12 +69,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Para acceder a nuestro tema global
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crear Cuenta'),
-        backgroundColor: Colors.transparent, // <<< MEJORA UI: AppBar transparente
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(30.0),
@@ -86,12 +82,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 20),
-            // <<< MEJORA UI: Textos usando el tema global para consistencia
             Text('Únete a la comunidad', style: theme.textTheme.headlineLarge),
             Text('Crea tu cuenta para empezar a cuidarte', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600])),
             const SizedBox(height: 40),
-
-            // <<< AÑADIDO: Widget para subir la foto de perfil
             Center(
               child: ImageUploadWidget(
                 purpose: ImageUploadPurpose.profile,
@@ -99,17 +92,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
             ),
             const SizedBox(height: 40),
-
-            // <<< AÑADIDO: Campo para el nombre de usuario
             TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Nombre de Usuario')),
             const SizedBox(height: 20),
-
             TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Correo Electrónico'), keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 20),
             TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Contraseña (mín. 6 caracteres)'), obscureText: true),
             const SizedBox(height: 40),
-            
-            // <<< MEJORA UI: El botón ahora usa el estilo del tema global
             _isLoading 
                 ? const Center(child: CircularProgressIndicator()) 
                 : ElevatedButton(onPressed: _register, child: const Text('REGISTRARME')),
