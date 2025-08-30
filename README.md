@@ -1,4 +1,4 @@
-# mental_app
+# Mentalp
 
 A new Flutter project.
 
